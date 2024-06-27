@@ -3,10 +3,11 @@ import { Text, View, Image, StyleSheet, ScrollView, FlatList, TouchableOpacity }
 import { API_ACCESS_TOKEN } from '@env';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import { useNavigation, StackActions } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const MovieDetail = ({ route }: any): JSX.Element => {
+  const navigation = useNavigation();
   const { id } = route.params;
   const [movie, setMovie] = useState<any>(null);
   const [recommendations, setRecommendations] = useState<any[]>([]);
@@ -23,8 +24,8 @@ const MovieDetail = ({ route }: any): JSX.Element => {
     const options = {
       method: 'GET',
       headers: {
-        accept: 'application/json',
-        Authorization: `Bearer ${API_ACCESS_TOKEN}`,
+        'accept': 'application/json',
+        'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
       },
     };
 
@@ -43,8 +44,8 @@ const MovieDetail = ({ route }: any): JSX.Element => {
     const options = {
       method: 'GET',
       headers: {
-        accept: 'application/json',
-        Authorization: `Bearer ${API_ACCESS_TOKEN}`,
+        'accept': 'application/json',
+        'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
       },
     };
 
@@ -83,7 +84,7 @@ const MovieDetail = ({ route }: any): JSX.Element => {
       console.log('Error adding favorite:', error);
     }
   };
-  
+
   const removeFavorite = async (): Promise<void> => {
     try {
       let favorites = await AsyncStorage.getItem('favoriteMovies');
@@ -98,8 +99,7 @@ const MovieDetail = ({ route }: any): JSX.Element => {
       console.log('Error removing favorite:', error);
     }
   };
-  
-  
+
   if (!movie) {
     return (
       <View style={styles.loadingContainer}>
@@ -115,13 +115,20 @@ const MovieDetail = ({ route }: any): JSX.Element => {
           source={{ uri: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` }}
           style={styles.bannerImage}
         />
-        <View style={styles.bannerOverlay}>
-          <Text style={styles.title}>{movie.title}</Text>
-          <Text style={styles.rating}>⭐ {movie.vote_average.toFixed(1)}</Text>
+        <LinearGradient
+          colors={['#00000000', 'rgba(0, 0, 0, 0.7)']}
+          locations={[0.6, 0.8]}
+          style={styles.gradientStyle}
+        >
+          <Text style={styles.movieTitle}>{movie.title}</Text>
+          <View style={styles.ratingContainer}>
+            <FontAwesome name="star" size={16} color="yellow" />
+            <Text style={styles.rating}>{movie.vote_average.toFixed(1)}</Text>
+          </View>
           <TouchableOpacity onPress={isFavorite ? removeFavorite : addFavorite} style={styles.favoriteButton}>
             <FontAwesome name={isFavorite ? 'heart' : 'heart-o'} size={24} color={isFavorite ? 'red' : 'white'} />
           </TouchableOpacity>
-        </View>
+        </LinearGradient>
       </View>
       <View style={styles.contentContainer}>
         <Text style={styles.overview}>{movie.overview}</Text>
@@ -147,21 +154,28 @@ const MovieDetail = ({ route }: any): JSX.Element => {
         <FlatList
           horizontal
           data={recommendations}
-          renderItem={({ item }) => (
-            <View style={styles.recommendationItem}>
-              <Image
-                source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster_path}` }}
-                style={styles.recommendationImage}
-              />
-              <Text style={styles.recommendationText}>{item.title}</Text>
-            </View>
-          )}
+          renderItem={({ item }) => {
+            const pushAction = StackActions.push('MovieDetail', { id: item.id });
+            return (
+              <TouchableOpacity
+                style={styles.recommendationItem}
+                onPress={() => navigation.dispatch(pushAction)}
+              >
+                <Image
+                  source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster_path}` }}
+                  style={styles.recommendationImage}
+                />
+                <Text style={styles.recommendationText}>{item.title}</Text>
+              </TouchableOpacity>
+            );
+          }}
           keyExtractor={(item) => item.id.toString()}
         />
       </View>
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
@@ -181,31 +195,34 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  bannerOverlay: {
+  gradientStyle: {
+    padding: 8,
+    height: '100%',
+    width: '100%',
     position: 'absolute',
     bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  title: {
-    fontSize: 24,
+  movieTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
+    marginBottom: 5,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
   },
   rating: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '600',
-    color: 'white',
-    marginTop: 4,
-    marginRight: 10,
+    color: 'yellow',
+    marginLeft: 4,
   },
   favoriteButton: {
     position: 'absolute',
-    top: 10,
+    bottom: 10,
     right: 10,
   },
   contentContainer: {
