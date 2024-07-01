@@ -24,7 +24,7 @@ Aplikasi ini memanfaatkan React Native untuk berinteraksi dengan Movies App dari
 - Buat file `.env` di folder root dan isi dengan kredensial Anda:
 ```API_KEY=YOUR_API_KEY_FROM_TMDB```
 
-3. **Mulai aplikasi**:
+4. **Mulai aplikasi**:
    ```bash
    npx expo start
 
