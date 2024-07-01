@@ -1,4 +1,4 @@
-# Dibuat oleh Taufik Hidayat (Kelompok 2)
+# Dibuat oleh Taufik Hidayat
 # Movie App (React Native)
 
 Aplikasi ini memanfaatkan React Native untuk berinteraksi dengan Movies App dari RapidAPI. Dengan aplikasi ini, Anda dapat dengan mudah mendapatkan informasi tentang film, termasuk trailer dan video terkait.
